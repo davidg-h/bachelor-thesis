@@ -1,4 +1,113 @@
 \chapter{Supplemental Information}\label{app:supplemental-information}
 
-\Blindtext
+\section{DeepWiki Research Examples}\label{app:1}
 
+Representative examples from the DeepWiki-assisted research conducted during this thesis, condensed and shortened from the full tool interactions.
+
+\subsection{ComfyUI}\label{app:1-comfyui}
+
+\textbf{Building an extension without modifying ComfyUI's source}
+
+Query: \textit{I want to build my own extension for ComfyUI without modifying ComfyUI source code. Is that possible and how can I do that?}
+
+Response: \textit{ComfyUI supports building extensions without modifying its core source code through its custom node system. Two approaches exist: a newer approach based on a \texttt{ComfyExtension} class and a \texttt{comfy\_entrypoint} function, and an older, still widely used approach based on a \texttt{NODE\_CLASS\_MAPPINGS} dictionary. Extensions are placed in the \texttt{custom\_nodes/} directory; during startup, ComfyUI scans this directory and loads each module, checking for \texttt{NODE\_CLASS\_MAPPINGS} or \texttt{comfy\_entrypoint}, and optionally registers a web directory so the extension can also serve its own frontend files.}
+
+\textbf{Real-time backend-to-frontend communication}
+
+Query: \textit{Once a workflow is running, how does the backend inform the frontend about progress or results in real time? Could a custom node package hook into it or add its own server routes?}
+
+Response: \textit{The backend keeps a WebSocket connection open at a dedicated endpoint and uses it to send real-time progress updates and results to the frontend, including which node is currently executing and streamed preview images during sampling. Custom node packages can hook into this same progress-reporting system rather than opening a separate connection, and can also register their own HTTP routes on the same server process, either by serving static frontend files from a declared web directory or by adding custom endpoints directly.}
+
+\subsection{GitNexus}\label{app:1-gitnexus}
+
+\textbf{Interacting with the graph}
+
+Query: \textit{What can a user actually do with this graph? Click, hover, select, filter, zoom, search? Is there a consistent set of interactions for browsing it?}
+
+Response: \textit{GitNexus provides a consistent set of interactions across its Web UI: clicking a node selects it and opens a code panel, while clicking empty canvas space clears the selection; hovering over a node shows a tooltip with its name. Zoom and pan are supported through dedicated buttons, mouse drag, and the scroll wheel, and selecting a node reveals a "focus" button that animates the camera to center on it. Filtering is available by node type, by edge/relationship type, and by hop-distance from a selected node, and a header search bar performs real-time filtering by name with keyboard navigation between results.}
+
+\textbf{Graph structure: nodes and edges}
+
+Query: \textit{How does GitNexus represent a codebase structure as a graph? What are the nodes and what are the edges/relationships between them?}
+
+Response: \textit{GitNexus represents a codebase as a property graph: nodes range from structural entities (files, folders, packages) to code entities (functions, methods, classes, interfaces, variables) to higher-level, automatically derived abstractions such as detected functional communities and traced execution-flow processes. Relationships between these nodes are typed as well, covering structural containment, function calls and imports, inheritance and interface implementation, and step-by-step participation in an execution-flow process. This typed structure is what lets the graph express relationships, such as which functions call which, or which symbols belong to the same functional area, directly as edges rather than something the user has to infer from a file listing.}
+
+\textbf{Rendering technology}
+
+Query: \textit{What technology or library does GitNexus use to render and interact with this graph?}
+
+Response: \textit{GitNexus uses Sigma.js for WebGL-accelerated graph rendering and Graphology for the underlying graph data structure and layout algorithms. Three layout modes are available: a default force-directed layout (Force), a hierarchical layout for folder/file relationships (Tree), and a layout that clusters nodes by community membership (Circles).}
+
+\section{NELS Graph Panel Specification}\label{app:2}
+
+The initial written specification that guided the AI-assisted implementation of the NELS graph-panel frontend (\hyperref[sec:4.4]{Section~4.4}):
+
+\lstinputlisting[basicstyle=\ttfamily\small, breaklines=true, breakindent=0pt, numbers=none, frame=none, xleftmargin=0pt, xrightmargin=0pt, literate={—}{{\textemdash}}1]{appendix/spec.md}
+
+\section{LLM System Prompts}\label{app:3}
+
+The system-prompt templates referenced in \hyperref[sec:4.6]{Sections~4.6} and \hyperref[sec:4.8]{4.8}, transcribed from the plugin source. Curly-brace placeholders (e.g. \texttt{\{style\}}) mark values interpolated at call time. The accompanying user message for each call is described briefly below its title, since it consists mainly of the reference prompts, axis terms, or term-profile data already described in the main text.
+
+\subsection{Dataset annotation (Section 4.6)}\label{app:3-dataset-annotation}
+
+\textbf{Term-profile-based cluster labeling:}\\
+(\texttt{label\_cluster\_from\_profile()}, \texttt{core/operations/cluster\_annotation.py})
+
+User content supplies the term profile (most frequent terms, most distinctive terms, key phrases) and a small set of representative example prompts, and, once other clusters have already been labeled, the list of labels already assigned so far to avoid duplicates.
+
+System prompt: \textit{You label semantic clusters\texttt{\{ctx\}}. You are given the most frequent terms, most distinctive terms, key phrases, and a few raw examples. Use all of them to infer the shared theme and output a single short label (2-5 words). Example - frequent: tench, goldfish, shark | distinctive: aquatic, marine | phrases: great white, tiger shark -> Aquatic Animals. Example - frequent: tabby, persian, siamese | distinctive: feline, domestic | phrases: persian cat -> Domestic Cats. Output ONLY the label. One line, no punctuation at the end.}
+
+\textbf{Raw-example cluster labeling (no-prefix fallback):}\\
+(\texttt{label\_cluster()}, \texttt{core/operations/cluster\_annotation.py})
+
+User content supplies up to 20 representative example prompts directly, plus the same term profile when available. This is the fallback path used when the dataset has no detectable shared prompt prefix, since the prefix is what the term-profile extraction relies on to strip templated text before counting terms.
+
+System prompt: \textit{You label semantic clusters of image generation prompts\texttt{\{ctx\}}. Output a single short label (2-5 words) capturing the shared theme. Example: 'a sports car racing', 'a blue sedan on a highway' -> Sports Cars. Example: 'a medieval castle at dusk', 'stone fortress walls' -> Medieval Architecture. Output ONLY the label. One line, no punctuation at the end.}
+
+\textbf{Refinement round:}\\
+(\texttt{refine\_labels()}, \texttt{core/operations/cluster\_annotation.py})
+
+User content lists every cluster's current label together with its frequent and distinctive terms, one line per cluster.
+
+System prompt: \textit{You refine semantic cluster labels\texttt{\{ctx\}}. Each line shows a cluster's current label, its most frequent terms, and its most distinctive terms. Improve labels that are too generic or overlap with another cluster - use the distinctive terms to differentiate. Reply with ONLY the revised labels, one per line, in the same order. Format: 'Cluster <id>: <label>'. Do not change labels that are already specific and unique.}
+
+\subsection{Semantic Axis Projection (Section 4.8)}\label{app:3-axis-projection}
+
+\textbf{Candidate label generation:}\\
+(\texttt{generate\_axis\_label\_candidates()}, \texttt{core/operations/axis\_projection.py})
+
+User content supplies the contrastive axis terms for both sides of the axis and their example prompts, plus, when labeling the second axis, the already-accepted first-axis label to exclude.
+
+System prompt: \textit{You name semantic axes in an image prompt embedding space. The keywords summarize what is distinctive on each side of the axis; the example prompts give tone and context. Reply with short, vivid phrases in the format 'X to Y' describing the concrete visual or thematic concept that changes along the axis. Never use generic scales like 'low to high' or 'simple to complex' unless they are grounded in the actual content. Return exactly \texttt{\{n\}} different candidate labels as a numbered list, one per line. Each line must contain only one 'X to Y' phrase.}
+
+\textbf{Candidate selection and refinement:}\\
+(\texttt{critique\_and\_refine\_axis\_label()}, \texttt{core/operations/axis\_projection.py})
+
+User content supplies the same contrastive axis terms together with the numbered list of candidates from the previous step. The bracketed exclusion line is appended only when labeling the second axis, carrying the already-accepted first-axis label forward so it cannot be reused.
+
+System prompt: \textit{You pick the best of several candidate axis labels for an image prompt embedding space. Judge by: (1) precision to the keywords, (2) vividness, (3) distinctness of both sides. You may lightly rewrite the winning candidate to sharpen it, but keep the 'X to Y' format and keep it grounded in the keywords. Output ONLY the final phrase, nothing else. [Already used for a different axis (do not reuse): \texttt{\{exclude\_label\}}]}
+
+\subsection{Consistency Check (Section 4.8)}\label{app:3-consistency-check}
+
+\textbf{LLM paraphrasing:}\\
+(\texttt{paraphrase()}, \texttt{core/operations/consistency\_check.py})
+
+User content is the base prompt itself. \texttt{\{style\}} is one of "minor rewording, synonyms only" (strength below 0.4), "moderate rephrasing, vary structure" (0.4 to below 0.7), or "aggressive paraphrase, change phrasing substantially" (0.7 and above); \texttt{\{max\_variant\_words\}} is the base prompt's own word count plus 5; the bracketed avoid-list is appended once earlier variants exist within the same call.
+
+System prompt: \textit{You paraphrase short image generation prompts. Style: \texttt{\{style\}}. Keep the paraphrase to at most \texttt{\{max\_variant\_words\}} words. Output exactly ONE paraphrase: a single line, no numbering, no extra text. [Avoid these already used paraphrases: \texttt{\{avoid\_hint\}}]}
+
+\subsection{Latent Probe (Section 4.8)}\label{app:3-latent-probe}
+
+\textbf{Initial candidate generation:}\\
+(\texttt{probe\_synthesize()}, \texttt{core/operations/latent\_probe.py})
+
+User content supplies the nearby "seed" reference prompts, labeled "write something like these", and, if available, the negative reference prompts, labeled "do not write anything like these".
+
+System prompt: \textit{You synthesize image generation prompts. Given reference prompts near a target concept and prompts far from it, write new prompts that match the target concept. Output exactly \texttt{\{count\}} prompts, one per line, no numbering, no explanations. Do not copy phrases from the references. Each prompt must be 5-20 words and a complete self-contained image description.}
+
+\textbf{Refinement iteration:}\\
+(\texttt{probe\_suggest\_iter()}, \texttt{core/operations/latent\_probe.py})
+
+User content supplies the current ranked candidate beam with similarity scores, the same negative reference prompts, and a trailing instruction: \textit{Write \texttt{\{count\}} new image prompts that push further in the direction of the top-scoring candidates and avoid the themes of the negatives. Use different vocabulary and phrasing - do not copy from the ranked list above.}
+
+System prompt: \textit{You write short image generation prompts. Output only the prompts themselves - one per line, no numbering, no explanations, no analysis. Every line must be a self-contained image prompt of 5-20 words.}

@@ -4,7 +4,7 @@
     a4paper,
     sfdefaults=false,
     toc=chapterentrywithdots,
-    twoside,openright,
+    twoside,openany,
     titlepage,
     parskip=half,
     headings=normal,  % reduces heading size
@@ -23,8 +23,8 @@
 \newcommand{\artderarbeit}{Bachelorarbeit}  % {Bachelorarbeit,Masterarbeit}
 \newcommand{\autor}{David Nguyen}
 \newcommand{\studiengang}{Medieninformatik}  % {Informatik,Wirtschaftsinformatik,Medieninformatik}
-\newcommand{\matrikelnr}{123\,4567}
-\newcommand{\erstgutachter}{Prof.\,Dr.~Tobias Bocklet}
+\newcommand{\matrikelnr}{354\,8145}
+\newcommand{\erstgutachter}{Prof.\,Dr.~Ulrich von Zadow}
 \newcommand{\zweitgutachter}{Prof.\, Moritz Schwind}
 % \newcommand{\betreuer}{M.Sc.\,~Martina Schmidt}
 % \newcommand{\unternehmen}{Musterfirma GmbH}
@@ -66,6 +66,27 @@
 \usepackage{array}
 \usepackage{ragged2e}
 \usepackage{lscape}
+\usepackage{graphicx} % \resizebox, already loaded above but harmless to ensure
+\usepackage{subcaption} % side-by-side 2D/3D figure pairs
+
+% float placement: many figures/tables in Chapter 5 otherwise back up badly
+\usepackage{placeins} % \FloatBarrier
+\setcounter{topnumber}{3}
+\setcounter{bottomnumber}{2}
+\setcounter{totalnumber}{5}
+\renewcommand{\topfraction}{0.85}
+\renewcommand{\bottomfraction}{0.6}
+\renewcommand{\textfraction}{0.15}
+\renewcommand{\floatpagefraction}{0.6}
+
+% allow line breaks inside long \texttt{} identifiers (e.g. dataset names with underscores)
+\usepackage[htt]{hyphenat}
+
+% top-align floats on dedicated float-only pages instead of vertically centering them
+\makeatletter
+\setlength{\@fptop}{0pt}
+\setlength{\@fpbot}{0pt plus 1fil}
+\makeatother
 
 % PDF/A compliance
 \begin{filecontents*}{\jobname .xmpdata}
@@ -102,7 +123,9 @@
 	showstringspaces=true,
 	numbers=left,
 	numberstyle=\small,
-	breakautoindent=true
+	breakautoindent=true,
+	breaklines=true,
+	breakindent=0pt
 }
 
 % page setup
@@ -110,6 +133,7 @@
 \geometry{paper=a4paper,left=2.5cm,top=3.0cm,bindingoffset=.8cm}
 \onehalfspacing
 \frenchspacing
+\emergencystretch=3em
 \clubpenalty = 10000
 \widowpenalty = 10000 
 \displaywidowpenalty = 10000
@@ -151,15 +175,12 @@
 
 \mainmatter
 \include{content/1_intro}
-\include{content/2_background}
+\include{content/2_foundations}
 \include{content/3_related_work}
-\include{content/4_research_topic}
-\include{content/5_method}
-\include{content/6_tool}
-\include{content/7_observations}
-\include{content/8_evaluation}
-\include{content/9_discussion}
-\include{content/10_outlook}
+\include{content/4_system_design}
+\include{content/5_results}
+\include{content/6_discussion}
+\include{content/7_conclusion}
 
 % remove if not needed
 \appendix
@@ -167,18 +188,20 @@
 
 \backmatter
 \listoffigures
-\cleardoublepage
+\clearpage
 
 \listoftables
-\cleardoublepage
+\clearpage
 
-\renewcommand{\lstlistlistingname}{List of Listings}  % change for German thesis
-\lstlistoflistings
-\cleardoublepage
+\let\oldthebibliography\thebibliography
+\renewcommand{\thebibliography}[1]{%
+  \oldthebibliography{#1}%
+  \interlinepenalty=10000
+}
 
-\bibliographystyle{wmaainf}
+\bibliographystyle{plain}
 \bibliography{refs}
 
-\printnoidxglossaries
+{\singlespacing\printnoidxglossaries}
 
 \end{document}

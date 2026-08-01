@@ -1,22 +1,29 @@
-\chapter{Introduction and Motivation}\label{ch:intro}
+\chapter{Introduction}\label{ch:intro}
 
-\begin{itemize}
-    \item Relevance of generative diffusion models in current machine learning research and creative applications.
-    \item Importance of latent spaces for controllability, variation, and semantic coherence.
-    \item Challenges in understanding and systematically exploring latent spaces.
-    \item Motivation for an investigation focused on interpolation, navigation, and perception.
-\end{itemize}
+\section{Motivation}\label{sec:1.1}
 
-You may have read about similar things in \cite{Goodliffe2007}.
-You can also write footnotes.\footnote{Footnotes will be positioned automatically.}
-\blindtext
+Text-to-image generation has gained substantial importance in visual and creative practices. The tools that make this technology usable are no longer confined to only research environments, because non-professional users are increasingly relying on them for everyday creative work as well \cite{tang2024democratizing}. This broader adoption highlights needs that extend beyond the simple generation of an image from a prompt, since users frequently also want to edit an existing image, explore variations of an idea, or compare and move between different results.
 
-\blindtext
+Much of this capability relies on diffusion models, which can achieve high-quality image generation within a strong generative framework \cite{ho2020denoising}. This was made more practical through latent diffusion, which moves the diffusion process into a compressed latent representation and supports flexible conditioning through text prompts \cite{rombach2022latent}.
 
-\section{This is an Important Section}
+This growing practical use, however, does not make the underlying process easy to understand. It is easy to generate many images, but it is difficult to comprehend why specific changes in prompts, seeds, or latent operations lead to specific visual results. The generative process involves several interacting representation spaces rather than a single unified latent space, each playing a different role in the generation pipeline. Prompt-related representations are of particular interest for semantic control, since text is encoded into embeddings that guide the generation process from start to finish \cite{radford2021clip,rombach2022latent}. In everyday use, however, these internal representations remain hidden, even though this is the level at which meaningful variations and transitions are happening.
 
-It is possible to reference glossary entries as \gls{library} as an example.
-\blindtext
+This matters increasingly for exactly this kind of exploration, since testing directional changes or checking whether a sequence of edits remains smooth or breaks down depends on representations that stay hidden from the user. Recent research suggests that these spaces do not behave uniformly: small alterations can lead to different visual changes, and intermediate results are not always stable or meaningful \cite{samuel2023normguided,park2023riemannian}. Navigation through these spaces should therefore not simply be assumed to work smoothly, but they should be examined more carefully. This thesis is motivated precisely by this gap between generating images on the one hand, and systematically exploring and inspecting latent spaces on the other.
 
-\subsection{And an even more important subsection}
-\blindtext
+\section{Goal, Research Questions, and Scope}\label{sec:1.2}
+
+Building on this motivation, this thesis aims to make latent-space navigation in generative diffusion models reproducible and empirically grounded. Concretely, existing text-to-image workflows are explored through interpolation, direction-based navigation, and structured comparison of their representations and outputs. To this end, the thesis combines a technical contribution, an external ComfyUI plugin for dataset creation, projection, clustering, and navigation, with a scientific contribution, an empirical analysis of how latent-space navigation behaves with regard to continuity, semantic change, stability, and interpretability.
+
+This goal is pursued through three research questions:
+
+\begin{enumerate}
+\item To what extent can latent spaces in generative diffusion models be systematically explored through interpolation and targeted navigation without modifying the underlying model?
+\item Which structural and perceptual patterns emerge during latent space navigation, and where do discontinuities or instabilities occur?
+\item What are the limits of interpretability and controllability of latent spaces?
+\end{enumerate}
+
+The work does not retrain or fine-tune the diffusion model itself and does not aim at a complete theory of latent-space geometry. It instead studies a bounded set of navigation operations on an existing generative system and interprets the results as empirical findings tied to the chosen model, prompts, and parameter settings. Broader comparative studies and an extended user study will be part of future work.
+
+\section{Thesis Structure}\label{sec:1.3}
+
+This thesis is organized into seven chapters. Following the introduction, \hyperref[ch:foundations]{Chapters~2} and \hyperref[ch:related-work]{3} establish the theoretical background and review related work relevant to this thesis. \hyperref[ch:system-design]{Chapter~4} presents the design and implementation of the plugin NELS (Navigation and Exploration of Latent Spaces) together with its experimental framework, while \hyperref[ch:results]{Chapter~5} reports the resulting analyses of latent-space structure and navigation behavior. \hyperref[ch:discussion]{Chapter~6} discusses these findings in relation to the research questions and the limitations of the evaluation, and \hyperref[ch:conclusion]{Chapter~7} concludes the thesis by outlining its main contributions and directions for future work.

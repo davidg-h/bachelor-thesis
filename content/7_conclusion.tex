@@ -1,0 +1,9 @@
+\chapter{Conclusion and Future Work}\label{ch:conclusion}
+
+This thesis presented the design, implementation, and evaluation of NELS, a ComfyUI plugin for exploring latent spaces in generative diffusion models. The work covered the complete exploration pipeline, including dataset construction, embedding projection, clustering, and a range of navigation operations. Their empirical evaluation examined structural and perceptual behavior, stability, interpretability, and controllability. The results show that latent-space navigation can be made systematic and inspectable, while also revealing that several operations behave less predictably and reliably than their design initially suggests.
+
+These findings point to several directions for future work. The most immediate is a controlled user study examining whether the limitations identified through automated evaluation are also perceived by users and whether the plugin provides an effective environment for latent-space exploration. Further work could refine the coarse variation-strength control of Consistency Check, improve the interpretability of the automatically derived second axis in Semantic Axis Projection through additional constraints or alternative discovery methods, investigate other dimensionality-reduction techniques for more effective visualization, and repeat the evaluation across different diffusion models and larger prompt datasets.
+
+Taken together, NELS provides both a working exploration tool and a first empirical account of how latent-space navigation actually behaves, laying the groundwork for the deeper investigations into latent spaces that future work should pursue.
+
+The complete source code is publicly available in the project repository \cite{davidgh2026nels}.
